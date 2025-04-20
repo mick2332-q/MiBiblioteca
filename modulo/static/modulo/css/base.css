@@ -1,70 +1,76 @@
 body {
-    background-image: url('../img/1722.jpg'); /* Ruta relativa a la imagen */
-    background-size: cover; /* Escala la imagen para cubrir toda la pantalla */
-    background-position: center; /* Centra la imagen */
-    background-repeat: no-repeat; /* Evita que la imagen se repita */
-    background-attachment: fixed; /* Hace que la imagen permanezca fija */
+    background-image: url('../img/1722.jpg'); 
+    background-size: cover; 
+    background-position: center; 
+    background-repeat: no-repeat; 
+    background-attachment: fixed; 
     margin: 0;
-    font-family: 'Poppins', sans-serif; /* Fuente predeterminada */
+    font-family: 'Poppins', sans-serif; 
 }
 
 form.d-flex.mb-4 input {
-    background: rgba(255, 255, 255, 0.5); /* Fondo blanco semitransparente */
-    border: 1px solid rgba(255, 255, 255, 0.3); /* Borde semitransparente */
-    border-radius: 5px; /* Bordes redondeados */
-    color: #000000; /* Color del texto */
-    padding: 10px; /* Espaciado interno */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra ligera */
-    backdrop-filter: blur(5px); /* Efecto de desenfoque */
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.3); 
+    border-radius: 5px; 
+    color: #000000; 
+    padding: 10px; 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+    backdrop-filter: blur(5px); 
 }
 
 form.d-flex.mb-4 input::placeholder {
-    color: rgba(0, 0, 0, 0.5); /* Color semitransparente para el texto del placeholder */
+    color: rgba(0, 0, 0, 0.5); 
 }
 
-/* Estilo para el botón */
+
 form.d-flex.mb-4 button {
-    background: rgba(255, 255, 255, 0.5); /* Fondo blanco semitransparente */
-    border: 1px solid rgba(255, 255, 255, 0.3); /* Borde semitransparente */
-    border-radius: 5px; /* Bordes redondeados */
-    color: #000000; /* Color del texto */
-    padding: 10px 20px; /* Espaciado interno */
-    cursor: pointer; /* Cambiar el cursor al pasar sobre el botón */
-    transition: background 0.3s ease, color 0.3s ease; /* Transición suave */
+    background: rgba(255, 255, 255, 0.5); 
+    border: 1px solid rgba(255, 255, 255, 0.3); 
+    border-radius: 5px; 
+    color: #000000; 
+    padding: 10px 20px; 
+    cursor: pointer; 
+    transition: background 0.3s ease, color 0.3s ease; 
 }
 
 form.d-flex.mb-4 button:hover {
-    background: rgba(255, 255, 255, 0.8); /* Fondo más opaco al pasar el mouse */
-    color: #007bff; /* Cambiar el color del texto al pasar el mouse */
+    background: rgba(255, 255, 255, 0.8); 
+    color: #007bff; 
 }
-/* Estilo del contenedor del menú */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: transparent; 
+    padding: 10px 20px;
+}
+
 .settings-menu {
     position: relative;
     display: inline-block;
 }
 
-/* Ícono de configuración */
+
 .settings-icon {
     font-size: 28px;
     cursor: pointer;
-    color: #333;
+    color: #141413;
     transition: transform 0.3s ease;
 }
 
 .settings-icon:hover {
-    color: #007bff; /* Cambiar color al pasar el mouse */
-    transform: rotate(90deg); /* Animación de rotación */
+    color: #007bff;
+    transform: rotate(90deg);
 }
 
 
-/* Opciones del menú */
 .settings-options {
     display: none;
     position: absolute;
     top: 40px;
-    right: 0;
-    background-color: #fff;
-    border: 1px solid #ddd;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.9); /* Fondo blanco semitransparente */
+    border: 1px solid #ccc;
     border-radius: 5px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     list-style: none;
@@ -72,16 +78,17 @@ form.d-flex.mb-4 button:hover {
     z-index: 1000;
 }
 
+
 .settings-options li {
     padding: 10px 20px;
     display: flex;
-    align-items: center;
-    gap: 10px;
+    justify-content: center; /* Centra los íconos horizontalmente */
+    align-items: center; /* Centra los íconos verticalmente */
 }
 
 .settings-options li a, .settings-options li button {
     text-decoration: none;
-    color: #333;
+    color: #131418;
     font-size: 14px;
     display: flex;
     align-items: center;
@@ -89,7 +96,7 @@ form.d-flex.mb-4 button:hover {
 }
 
 .settings-options li:hover {
-    background-color: #f5f5f5;
+    background-color: #968383;
 }
 
 /* Mostrar el menú al hacer clic */

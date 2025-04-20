@@ -12,38 +12,33 @@
 <body class="bg-light">
 
 <!-- 🧭 NAVBAR -->
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
-  <div class="container">
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid">
     <a class="navbar-brand" href="{% url 'index' %}">📚 Mi Biblioteca</a>
-
     <div class="d-flex ms-auto align-items-center">
       {% if user.is_authenticated %}
         <div class="settings-menu">
           <div class="settings-icon" title="Opciones">
               <i class="fas fa-cog"></i> <!-- Ícono de configuración -->
           </div>
-          <ul class="settings-options">
-              <li>
-                  <a href="{% url 'perfil' %}" title="Perfil">
-                      <i class="fas fa-user"></i> Perfil
-                  </a>
-              </li>
-              <li>
-                  <form method="post" action="{% url 'logout' %}" style="display:inline;" title="Cerrar sesión">
-                      {% csrf_token %}
-                      <button type="submit" class="btn btn-link text-decoration-none text-dark">
-                          <i class="fas fa-sign-out-alt"></i> Cerrar sesión
-                      </button>
-                  </form>
-              </li>
-          </ul>
-      </div>
+         <ul class="settings-options">
+            <li>
+                <a href="{% url 'perfil' %}" title="Ir a tu perfil">
+                    <i class="fas fa-user"></i> <!-- Ícono de usuario -->
+                </a>
+            </li>
+            <li>
+                <form method="post" action="{% url 'logout' %}" style="display:inline;" title="Cerrar sesión">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-link text-decoration-none" title="Cerrar sesión">
+                        <i class="fas fa-sign-out-alt"></i> <!-- Ícono de cerrar sesión -->
+                    </button>
+                </form>
+            </li>
+        </ul>
+        </div>
       {% else %}
-        <a href="
-        
-        
-        
-        {% url 'login' %}" class="btn btn-outline-primary me-2 btn-sm">Iniciar sesión</a>
+        <a href="{% url 'login' %}" class="btn btn-outline-light me-2 btn-sm">Iniciar sesión</a>
         <a href="{% url 'registro' %}" class="btn btn-primary btn-sm">Registrarse</a>
       {% endif %}
     </div>

@@ -1,8 +1,8 @@
 body {
-    background-image: url('../img/1722.jpg'); /* Ruta relativa a la imagen */
-    background-size: cover; /* Escala la imagen para cubrir toda la pantalla */
-    background-position: center; /* Centra la imagen */
-    background-repeat: no-repeat; /* Evita que la imagen se repita */
+    background-image: url('../img/1722.jpg'); 
+    background-size: cover;
+    background-position: center; 
+    background-repeat: no-repeat; 
     display: flex;
     justify-content: center;
     align-items: center;
@@ -12,11 +12,11 @@ body {
 }
 
 .login {
-    background: rgba(255, 255, 255, 0.3); /* Fondo blanco con transparencia */
-    backdrop-filter: blur(10px); /* Efecto de desenfoque */
+    background: rgba(255, 255, 255, 0.3); 
+    backdrop-filter: blur(10px); 
     padding: 2rem;
-    border-radius: 10px; /* Bordes redondeados */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra */
+    border-radius: 10px; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
     width: 100%;
     max-width: 400px;
 }
@@ -75,13 +75,13 @@ body {
     color: #000000;
 }
 .forgot-password {
-    color: #4e0900; /* Cambia este color al que desees */
-    text-decoration: none; /* Elimina el subrayado si no lo necesitas */
+    color: #4e0900; 
+    text-decoration: none;
 }
 
 .forgot-password:hover {
-    color: #0056b3; /* Cambia el color al pasar el cursor */
-    text-decoration: underline; /* Agrega subrayado al pasar el cursor */
+    color: #0056b3; 
+    text-decoration: underline; 
 }
 
 .login--button {
