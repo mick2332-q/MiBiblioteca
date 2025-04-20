@@ -1,0 +1,41 @@
+{% extends 'modulo/base.html' %}
+
+{% block title %}Información del Autor{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Información del Autor</h2>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h3>{{ autor.nombre }}</h3>
+            <p>{{ autor.biografia }}</p>
+        </div>
+    </div>
+
+    <h4 class="mb-3">Más libros de {{ autor.nombre }}</h4>
+    <div class="row">
+        {% if mostrar_mensaje %}
+            <div class="col-md-12">
+                <p>Por favor, <a href="{% url 'login' %}">inicia sesión</a> o <a href="{% url 'registro' %}">regístrate</a> para ver los libros de este autor.</p>
+            </div>
+        {% else %}
+            {% for libro in libros %}
+                <div class="col-md-3 mb-4">
+                    <div class="card h-100">
+                        {% if libro.portada %}
+                            <img src="{{ libro.portada }}" class="card-img-top" style="height: 250px; object-fit: cover;">
+                        {% else %}
+                            <img src="https://via.placeholder.com/150" class="card-img-top" alt="Portada no disponible">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ libro.titulo }}</h5>
+                            <a href="{{ libro.link }}" target="_blank" class="btn btn-outline-primary btn-sm">Ver vista previa</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

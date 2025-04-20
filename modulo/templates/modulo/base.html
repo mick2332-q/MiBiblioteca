@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    {% load static %} <!-- Cargar el módulo static -->
+    <meta charset="UTF-8">
+    <title>{% block title %}Mi Biblioteca{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"> 
+    <link href="{% static 'modulo/css/base.css' %}" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<!-- 🧭 NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
+  <div class="container">
+    <a class="navbar-brand" href="{% url 'index' %}">📚 Mi Biblioteca</a>
+
+    <div class="d-flex ms-auto align-items-center">
+      {% if user.is_authenticated %}
+        <div class="settings-menu">
+          <div class="settings-icon" title="Opciones">
+              <i class="fas fa-cog"></i> <!-- Ícono de configuración -->
+          </div>
+          <ul class="settings-options">
+              <li>
+                  <a href="{% url 'perfil' %}" title="Perfil">
+                      <i class="fas fa-user"></i> Perfil
+                  </a>
+              </li>
+              <li>
+                  <form method="post" action="{% url 'logout' %}" style="display:inline;" title="Cerrar sesión">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-link text-decoration-none text-dark">
+                          <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                      </button>
+                  </form>
+              </li>
+          </ul>
+      </div>
+      {% else %}
+        <a href="
+        
+        
+        
+        {% url 'login' %}" class="btn btn-outline-primary me-2 btn-sm">Iniciar sesión</a>
+        <a href="{% url 'registro' %}" class="btn btn-primary btn-sm">Registrarse</a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+
+<!-- 🔽 CONTENIDO -->
+<main class="container mb-5">
+    {% block content %}
+    {% endblock %}
+</main>
+
+<!-- ⚙️ Bootstrap JS (opcional) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const settingsMenu = document.querySelector('.settings-menu');
+        const settingsIcon = document.querySelector('.settings-icon');
+
+        settingsIcon.addEventListener('click', function () {
+            settingsMenu.classList.toggle('active'); // Alternar la clase "active"
+        });
+
+        // Cerrar el menú si se hace clic fuera de él
+        document.addEventListener('click', function (event) {
+            if (!settingsMenu.contains(event.target)) {
+                settingsMenu.classList.remove('active');
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,116 @@
+body {
+    background-image: url('../img/1722.jpg'); /* Ruta relativa a la imagen */
+    background-size: cover; /* Escala la imagen para cubrir toda la pantalla */
+    background-position: center; /* Centra la imagen */
+    background-repeat: no-repeat; /* Evita que la imagen se repita */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+}
+
+.login {
+    background: rgba(255, 255, 255, 0.3); /* Fondo blanco con transparencia */
+    backdrop-filter: blur(10px); /* Efecto de desenfoque */
+    padding: 2rem;
+    border-radius: 10px; /* Bordes redondeados */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra */
+    width: 100%;
+    max-width: 400px;
+}
+.login--form {
+    text-align: center;
+}
+
+.login--title {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #333;
+}
+
+.login--content {
+    display: flex;
+    margin-bottom: 1.5rem;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.login-box {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 0.5rem;
+    background-color: #f9f9f9;
+}
+
+.login-icon {
+    margin-right: 0.5rem;
+    color: #555;
+}
+
+.login-input {
+    border: none;
+    outline: none;
+    background: transparent;
+    flex: 1;
+    font-size: 1rem;
+    color: #333;
+}
+
+.login-input::placeholder {
+    color: #aaa;
+}
+
+.login--check {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    color: #000000;
+}
+.forgot-password {
+    color: #4e0900; /* Cambia este color al que desees */
+    text-decoration: none; /* Elimina el subrayado si no lo necesitas */
+}
+
+.forgot-password:hover {
+    color: #0056b3; /* Cambia el color al pasar el cursor */
+    text-decoration: underline; /* Agrega subrayado al pasar el cursor */
+}
+
+.login--button {
+    background-color: #4e0900;
+    color: #fff;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.login--button:hover {
+    background-color: #4e0900;
+}
+
+.login-register {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+.login-register a {
+    color: #4e0900;;
+    text-decoration: none;
+}
+
+.login-register a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}

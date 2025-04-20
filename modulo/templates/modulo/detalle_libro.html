@@ -1,0 +1,58 @@
+{% extends 'modulo/base.html' %}
+
+{% block title %}Detalle del Libro{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">{{ libro.titulo }}</h2>
+
+    <div class="row">
+        <div class="col-md-4">
+            {% if libro.portada %}
+                <img src="{{ libro.portada }}" class="img-fluid" alt="Portada del libro">
+            {% else %}
+                <img src="https://via.placeholder.com/300x400" class="img-fluid" alt="Portada no disponible">
+            {% endif %}
+        </div>
+        <div class="col-md-8">
+            <p><strong>Autor:</strong> <a href="{% url 'autor_libros' libro.autor %}">{{ libro.autor }}</a></p>
+            <p><strong>Descripción:</strong> {{ libro.descripcion }}</p>
+            
+            <!-- Botón dinámico para vista previa o ver online -->
+            {% if libro.link != '#' %}
+                <a href="{{ libro.link }}" target="_blank" class="btn btn-primary">Ver vista previa</a>
+            {% else %}
+                <a href="{{ libro.link }}" target="_blank" class="btn btn-secondary">Ver online</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Barra de búsqueda -->
+    <h3 class="mt-5">Buscar libros</h3>
+    <form method="get" class="d-flex mb-4">
+        <input name="q" class="form-control me-2" type="search" placeholder="Buscar libros..." aria-label="Buscar">
+        <button class="btn btn-primary" type="submit">Buscar</button>
+    </form>
+
+    <!-- Libros sugeridos -->
+    <h3 class="mb-4">Libros sugeridos</h3>
+    <div class="row">
+        {% for libro in libros_sugeridos|slice:":4" %}
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    {% if libro.portada %}
+                        <img src="{{ libro.portada }}" class="card-img-top" alt="Portada del libro">
+                    {% else %}
+                        <img src="https://via.placeholder.com/150" class="card-img-top" alt="Portada no disponible">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ libro.titulo }}</h5>
+                        <p class="card-text"><strong>Autor:</strong> {{ libro.autor }}</p>
+                        <a href="{{ libro.link }}" target="_blank" class="btn btn-primary btn-sm">Ver vista previa</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

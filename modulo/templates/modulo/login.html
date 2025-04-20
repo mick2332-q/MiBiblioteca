@@ -1,0 +1,61 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión</title>
+    <link rel="stylesheet" href="{% static 'modulo/css/login.css' %}">
+    <!-- Remix Icons para los íconos -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+</head>
+<body>
+    <div class="login">
+        <form method="post" class="login--form">
+            {% csrf_token %}
+            <h2 class="login--title">Iniciar Sesión</h2>
+            <div class="login--content">
+                <div class="login-box">
+                    <span class="login-icon"><i class="ri-user-3-line"></i></span>
+                    <input type="text" name="username" class="login-input" placeholder="Usuario" required>
+                </div>
+                <div class="login-box">
+                    <span class="login-icon"><i class="ri-lock-2-line"></i></span>
+                    <input type="password" name="password" id="password" class="login-input" placeholder="Contraseña" required>
+                    <span class="login-eye" id="togglePassword">
+                        <i class="ri-eye-off-line"></i>
+                    </span>
+                </div>
+            </div>
+            <div class="login--check">
+                <label>
+                    <input type="checkbox" name="remember"> Recuérdame
+                </label>
+                <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+            </div>
+            <button type="submit" class="login--button">Iniciar Sesión</button>
+            <div class="login-register">
+                <p>¿No tienes cuenta? <a href="{% url 'registro' %}">Regístrate</a></p>
+            </div>
+        </form>
+    </div>
+
+    <!-- Script para mostrar/ocultar contraseña -->
+    <script>
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+
+        togglePassword.addEventListener('click', () => {
+            // Cambiar el tipo de input entre 'password' y 'text'
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+
+            // Cambiar el ícono dinámicamente
+            togglePassword.innerHTML = type === 'password' 
+                ? '<i class="ri-eye-off-line"></i>' 
+                : '<i class="ri-eye-line"></i>';
+        });
+    </script>
+</body>
+</html>
+
