@@ -1,10 +1,38 @@
-# Ignorar la base de datos
+# Ignore base de datos local
 db.sqlite3
 
-# Ignorar archivos temporales
-__pycache__/
-*.pyc
-
-# Entornos virtuales (por si acaso)
+# Ignore entornos virtuales
 env/
 venv/
+ENV/
+VENV/
+
+# Ignore pycache y archivos compilados de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore configuraciones de entorno
+*.env
+.env/
+
+# Ignore archivos de configuración de editor
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Ignore archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Ignore carpetas de migraciones vacías (opcional)
+**/migrations/*.pyc
+**/migrations/__pycache__/
+
+# Ignore coverage report
+htmlcov/
+.coverage
+
+# Ignore archivos de logs
+*.log
