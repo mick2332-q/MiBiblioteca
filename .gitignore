@@ -1,6 +1,3 @@
-# Ignore base de datos local
-db.sqlite3
-
 # Ignore entornos virtuales
 env/
 venv/
