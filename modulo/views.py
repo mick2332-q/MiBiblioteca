@@ -88,6 +88,31 @@ def index(request):
         'libros_guardados': libros_guardados
     })
 
+def ver_libro(request):
+    if request.method == 'POST':
+        titulo = request.POST.get('titulo')
+        autor = request.POST.get('autor')  # Obtener el autor del formulario
+        link = request.POST.get('link')
+        portada = request.POST.get('portada')
+        usuario = request.user
+
+        # Validar que todos los campos necesarios estén presentes
+        if not autor:
+            autor = "Autor desconocido"  # Valor predeterminado si no se proporciona el autor
+
+        # Crear el registro en la base de datos
+        LibroVisto.objects.create(
+            usuario=usuario,
+            titulo=titulo,
+            autor=autor,
+            link=link,
+            portada=portada
+        )
+
+        # Redirigir al enlace del libro
+        return redirect(link)
+
+    return redirect('index')  # Redirigir a la página principal si no es un POST
 
 
 def registro(request):

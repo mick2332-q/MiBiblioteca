@@ -41,9 +41,10 @@
 
                         <!-- Ver online -->
                         {% if user.is_authenticated %}
-                        <form method="post" action="{% url 'ver_libro' %}" class="d-inline">
+                       <form method="post" action="{% url 'ver_libro' %}" class="d-inline">
                             {% csrf_token %}
                             <input type="hidden" name="titulo" value="{{ libro.titulo }}">
+                            <input type="hidden" name="autor" value="{{ libro.autores|join:", " }}"> 
                             <input type="hidden" name="link" value="{{ libro.link }}">
                             <input type="hidden" name="portada" value="{{ libro.portada }}">
                             <button type="submit" class="btn btn-outline-primary btn-sm">Ver online</button>
