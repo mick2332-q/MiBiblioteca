@@ -61,9 +61,10 @@
                             {% else %}
                                 <form method="post" action="{% url 'guardar_libro' %}" class="mt-2">
                                     {% csrf_token %}
-                                    <input type="hidden" name="titulo" value="{{ libro.titulo }}">
-                                    <input type="hidden" name="link" value="{{ libro.link }}">
-                                    <input type="hidden" name="portada" value="{{ libro.portada }}">
+                                        <input type="hidden" name="titulo" value="{{ libro.titulo }}">
+                                        <input type="hidden" name="autor" value="{{ libro.autores|join:", " }}"> 
+                                        <input type="hidden" name="link" value="{{ libro.link }}">
+                                        <input type="hidden" name="portada" value="{{ libro.portada }}">
                                     <button type="submit" class="btn btn-success btn-sm">Guardar</button>
                                 </form>
                             {% endif %}
@@ -105,6 +106,7 @@
                                 <form method="post" action="{% url 'guardar_libro' %}" class="mt-2">
                                     {% csrf_token %}
                                     <input type="hidden" name="titulo" value="{{ libro.titulo }}">
+                                    <input type="hidden" name="autor" value="{{ libro.autores|join:", " }}"> <!-- Agrega esta línea -->
                                     <input type="hidden" name="link" value="{{ libro.link }}">
                                     <input type="hidden" name="portada" value="{{ libro.portada }}">
                                     <button type="submit" class="btn btn-success btn-sm">Guardar</button>
