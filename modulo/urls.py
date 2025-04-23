@@ -8,7 +8,7 @@ urlpatterns = [
     path('perfil/', views.perfil, name='perfil'), 
     path('ver-libro/', views.marcar_libro_visto, name='ver_libro'),
     path('guardar-libro/', views.guardar_libro, name='guardar_libro'),
-    path('agregar_comentario_externo/', views.agregar_comentario_externo, name='agregar_comentario_externo'),
+    
     path('comentarios/<slug:titulo_slug>/<slug:autor_slug>/', views.comentarios_libro, name='comentarios_libro'),
     path('autor/<str:autor>/', views.autor_detalle, name='autor_detalle'),
     path('libro/<str:id>/', views.detalle_libro, name='detalle_libro'),

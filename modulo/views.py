@@ -337,18 +337,3 @@ def comentarios_libro(request, titulo_slug, autor_slug):
         "autor": autor,
         "comentarios": comentarios,
     })
-
-def agregar_comentario_externo(request):
-    if request.method == "POST":
-        titulo = request.POST.get('titulo')
-        autor = request.POST.get('autor')
-        contenido = request.POST.get('contenido')
-
-        ComentarioExterno.objects.create(
-            titulo=titulo,
-            autor=autor,
-            usuario=request.user,
-            contenido=contenido
-        )
-        messages.success(request, 'Comentario agregado exitosamente.')
-        return redirect(request.META.get('HTTP_REFERER', '/'))
