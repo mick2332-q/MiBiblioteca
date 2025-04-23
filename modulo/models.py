@@ -68,4 +68,14 @@ class Reseña(models.Model):
 
     def __str__(self):
         return f"Reseña de {self.usuario.username} para {self.libro_ISBN}"
+    
+class ComentarioExterno(models.Model):
+    titulo = models.CharField(max_length=255)  # Título del libro
+    autor = models.CharField(max_length=255)  # Autor del libro
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    contenido = models.TextField()
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Comentario de {self.usuario.username} en {self.titulo}"
 

@@ -41,16 +41,16 @@
 
                         <!-- Ver online -->
                         {% if user.is_authenticated %}
-                       <form method="post" action="{% url 'ver_libro' %}" class="d-inline">
-                            {% csrf_token %}
-                            <input type="hidden" name="titulo" value="{{ libro.titulo }}">
-                            <input type="hidden" name="autor" value="{{ libro.autores|join:", " }}"> 
-                            <input type="hidden" name="link" value="{{ libro.link }}">
-                            <input type="hidden" name="portada" value="{{ libro.portada }}">
-                            <button type="submit" class="btn btn-outline-primary btn-sm">Ver online</button>
-                        </form>
+                            <form method="post" action="{% url 'ver_libro' %}" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="titulo" value="{{ libro.titulo }}">
+                                <input type="hidden" name="autor" value="{{ libro.autores|join:", " }}"> 
+                                <input type="hidden" name="link" value="{{ libro.link }}">
+                                <input type="hidden" name="portada" value="{{ libro.portada }}">
+                                <button type="submit" class="btn btn-outline-primary btn-sm">Ver online</button>
+                            </form>
                         {% else %}
-                        <a href="{{ libro.link }}" target="_blank" class="btn btn-outline-primary btn-sm">Ver online</a>
+                            <a href="{{ libro.link }}" target="_blank" class="btn btn-outline-primary btn-sm">Ver online</a>
                         {% endif %}
 
                         <!-- Guardar libro -->
@@ -61,17 +61,22 @@
                             {% else %}
                                 <form method="post" action="{% url 'guardar_libro' %}" class="mt-2">
                                     {% csrf_token %}
-                                        <input type="hidden" name="titulo" value="{{ libro.titulo }}">
-                                        <input type="hidden" name="autor" value="{{ libro.autores|join:", " }}"> 
-                                        <input type="hidden" name="link" value="{{ libro.link }}">
-                                        <input type="hidden" name="portada" value="{{ libro.portada }}">
+                                    <input type="hidden" name="titulo" value="{{ libro.titulo }}">
+                                    <input type="hidden" name="autor" value="{{ libro.autores|join:", " }}"> 
+                                    <input type="hidden" name="link" value="{{ libro.link }}">
+                                    <input type="hidden" name="portada" value="{{ libro.portada }}">
                                     <button type="submit" class="btn btn-success btn-sm">Guardar</button>
                                 </form>
                             {% endif %}
                         {% endwith %}
                         {% endif %}
+
                         <!-- Botón Comentar -->
-                        <button class="btn btn-warning btn-sm mt-2">Comentar</button>
+                <a 
+                    href="{% url 'comentarios_libro' libro.titulo|slugify libro.autores|join:', '|slugify %}" 
+                    class="btn btn-warning btn-sm mt-2">
+                    Comentar
+                </a>
                     </div>
                 </div>
             </div>
@@ -108,7 +113,7 @@
                                 <form method="post" action="{% url 'guardar_libro' %}" class="mt-2">
                                     {% csrf_token %}
                                     <input type="hidden" name="titulo" value="{{ libro.titulo }}">
-                                    <input type="hidden" name="autor" value="{{ libro.autores|join:", " }}"> <!-- Agrega esta línea -->
+                                    <input type="hidden" name="autor" value="{{ libro.autores|join:", " }}">
                                     <input type="hidden" name="link" value="{{ libro.link }}">
                                     <input type="hidden" name="portada" value="{{ libro.portada }}">
                                     <button type="submit" class="btn btn-success btn-sm">Guardar</button>
@@ -119,12 +124,55 @@
                         <a href="{% url 'registro' %}" class="btn btn-warning btn-sm">Regístrate para ver más</a>
                     {% endif %}
                     <!-- Botón Comentar -->
-                    <button class="btn btn-warning btn-sm mt-2">Comentar</button>
+                   <a 
+                    href="{% url 'comentarios_libro' libro.titulo|slugify libro.autores|join:', '|slugify %}" 
+                    class="btn btn-warning btn-sm mt-2">
+                    Comentar
+                </a>
                 </div>
             </div>
         </div>
     {% endfor %}
 </div>
+
+<!-- Modal para comentarios -->
+<div class="modal fade" id="comentarioModal" tabindex="-1" aria-labelledby="comentarioModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="comentarioModalLabel">Agregar Comentario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'agregar_comentario_externo' %}">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <input type="hidden" id="modal-titulo" name="titulo">
+                    <input type="hidden" id="modal-autor" name="autor">
+                    <textarea name="contenido" class="form-control" placeholder="Escribe tu comentario aquí..." required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn btn-primary">Enviar Comentario</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    var comentarioModal = document.getElementById('comentarioModal');
+    comentarioModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget; // Botón que activó el modal
+        var titulo = button.getAttribute('data-titulo');
+        var autor = button.getAttribute('data-autor');
+
+        // Actualizar los campos ocultos del formulario
+        var modalTitulo = comentarioModal.querySelector('#modal-titulo');
+        var modalAutor = comentarioModal.querySelector('#modal-autor');
+        modalTitulo.value = titulo;
+        modalAutor.value = autor;
+    });
+</script>
 
 {% endblock %}
 

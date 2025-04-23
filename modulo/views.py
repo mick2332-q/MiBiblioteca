@@ -1,10 +1,11 @@
 from django.shortcuts import render,redirect,get_object_or_404
 import requests
-from .models import Libro, Categoria,HistorialBusqueda, LibroFavorito, LibroVisto, Reseña
+from .models import Libro, Categoria,HistorialBusqueda, LibroFavorito, LibroVisto, Reseña,ComentarioExterno
 from django.core.files.base import ContentFile
 from django.contrib.auth import authenticate,login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
+from django.utils.text import slugify
 import random
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
@@ -52,11 +53,11 @@ def index(request):
         libros_destacados = [
             {
                 'titulo': libro.get('volumeInfo', {}).get('title', 'Sin título'),
-                'autores': libro.get('volumeInfo', {}).get('authors', ['Desconocido']),  # Lista de autores
+                'autores': libro.get('volumeInfo', {}).get('authors', ['Desconocido']),
                 'portada': libro.get('volumeInfo', {}).get('imageLinks', {}).get('thumbnail', None),
                 'link': libro.get('volumeInfo', {}).get('previewLink', '#')
             }
-            for libro in libros[:4]  # Limitar a 4 libros sugeridos
+            for libro in libros[:4]
         ]
 
     if query:
@@ -72,20 +73,24 @@ def index(request):
                 info = item.get('volumeInfo', {})
                 resultados.append({
                     'titulo': info.get('title', 'Sin título'),
-                    'autores': info.get('authors', ['Desconocido']),  # Lista de autores
+                    'autores': info.get('authors', ['Desconocido']),
                     'descripcion': info.get('description', 'Sin descripción'),
                     'portada': info.get('imageLinks', {}).get('thumbnail', ''),
-                    'link': info.get('previewLink', '#')  # Enlace a la vista previa
+                    'link': info.get('previewLink', '#')
                 })
 
     if not request.user.is_authenticated and len(resultados) > 3:
         resultados = resultados[:3]
 
+    # Obtener todos los comentarios
+    comentarios = ComentarioExterno.objects.all()
+
     return render(request, 'modulo/index.html', {
         'libros_destacados': libros_destacados,
         'resultados': resultados,
         'query': query,
-        'libros_guardados': libros_guardados
+        'libros_guardados': libros_guardados,
+        'comentarios': comentarios
     })
 
 def ver_libro(request):
@@ -308,3 +313,42 @@ def autor_detalle(request, autor):
         'libros': libros,
         'mostrar_mensaje': not request.user.is_authenticated  
     })
+
+def comentarios_libro(request, titulo_slug, autor_slug):
+    # Convertir slugs a texto legible
+    titulo = titulo_slug.replace('-', ' ')
+    autor = autor_slug.replace('-', ' ')
+    
+    # Filtrar comentarios relacionados
+    comentarios = ComentarioExterno.objects.filter(titulo=titulo, autor=autor)
+
+    if request.method == "POST":
+        contenido = request.POST.get("contenido")
+        ComentarioExterno.objects.create(
+            titulo=titulo, 
+            autor=autor, 
+            usuario=request.user, 
+            contenido=contenido
+        )
+        return redirect("comentarios_libro", titulo_slug=slugify(titulo), autor_slug=slugify(autor))
+
+    return render(request, "modulo/comentarios_libro.html", {
+        "titulo": titulo,
+        "autor": autor,
+        "comentarios": comentarios,
+    })
+
+def agregar_comentario_externo(request):
+    if request.method == "POST":
+        titulo = request.POST.get('titulo')
+        autor = request.POST.get('autor')
+        contenido = request.POST.get('contenido')
+
+        ComentarioExterno.objects.create(
+            titulo=titulo,
+            autor=autor,
+            usuario=request.user,
+            contenido=contenido
+        )
+        messages.success(request, 'Comentario agregado exitosamente.')
+        return redirect(request.META.get('HTTP_REFERER', '/'))

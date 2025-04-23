@@ -1,0 +1,33 @@
+{% extends 'modulo/base.html' %}
+
+{% block title %}Comentarios de {{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Comentarios para "{{ titulo }}"</h1>
+    <p><strong>Autor:</strong> {{ autor }}</p>
+
+    <h3>Añadir un nuevo comentario:</h3>
+    {% if user.is_authenticated %}
+        <form method="post">
+            {% csrf_token %}
+            <textarea name="contenido" class="form-control mb-3" placeholder="Escribe tu comentario aquí" required></textarea>
+            <button type="submit" class="btn btn-primary">Agregar Comentario</button>
+        </form>
+    {% else %}
+        <p>Inicia sesión para agregar un comentario.</p>
+    {% endif %}
+
+    <h3 class="mt-4">Comentarios:</h3>
+    <ul class="list-group">
+        {% for comentario in comentarios %}
+            <li class="list-group-item">
+                <strong>{{ comentario.usuario.username }}:</strong> {{ comentario.contenido }}
+                <br><small>{{ comentario.fecha_creacion }}</small>
+            </li>
+        {% empty %}
+            <li class="list-group-item">No hay comentarios aún.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
