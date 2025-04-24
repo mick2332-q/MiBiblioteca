@@ -8,7 +8,6 @@ from django.contrib import messages
 from django.utils.text import slugify
 from collections import defaultdict
 from unidecode import unidecode
-from django.http import JsonResponse
 import re ,random
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
@@ -41,7 +40,6 @@ def index(request):
     query = request.GET.get('q', '')
     resultados = []
 
-    
     libros_guardados = []
     if request.user.is_authenticated:
         libros_guardados = set(
@@ -165,7 +163,7 @@ def guardar_libro(request):
     link = request.POST.get('link')
     portada_url = request.POST.get('portada')
 
-    
+    # Crear el libro en la base si no existe
     libro, creado = Libro.objects.get_or_create(
         titulo=titulo,
         autor=autor,
@@ -182,9 +180,9 @@ def guardar_libro(request):
                 nombre_imagen = f"{libro.titulo.replace(' ', '_')}.jpg"
                 libro.portada.save(nombre_imagen, ContentFile(response.content), save=True)
         except:
-            pass  
+            pass  # Si no se puede descargar la portada, continuar sin error
 
-    
+    # Verificar si el libro ya está en favoritos
     ya_guardado = LibroFavorito.objects.filter(
         usuario=request.user,
         titulo=titulo,

@@ -15,3 +15,51 @@
     cursor: pointer; 
     transition: background 0.3s ease, color 0.3s ease; 
 }
+.btn.btn-sm.btn-primary{
+    background: rgba(4, 223, 132, 0.87); 
+    border: none; 
+    padding: 5px 10px; 
+    color: #fff; 
+    border-radius: 5px; 
+    cursor: pointer; 
+    transition: background 0.3s ease, color 0.3s ease; 
+}
+.list-group-item > div:first-child {
+    flex-grow: 1; /* Permite que este div crezca para ocupar el espacio disponible */
+    margin-right: 10px;
+     /* Opcional: añade un poco de espacio a la derecha del comentario */
+  }
+/* Estilos para el botón Guardar */
+.btn-guardar {
+    background-color: green;
+    color: white;
+    border: 1px solid darkgreen;
+  }
+  
+  .btn-guardar:hover {
+    background-color: darkgreen;
+  }
+  
+  /* Estilos para el botón Cancelar */
+  .btn-cancelar {
+    background-color: lightgray;
+    color: black;
+    border: 1px solid gray;
+  }
+  
+  .btn-cancelar:hover {
+    background-color: gray;
+    color: white;
+  }
+  .formulario-edicion-comentario-botones {
+    display: flex;
+    flex-direction: column; /* Coloca los elementos en columna */
+    align-items: center; /* Centra los elementos horizontalmente */
+    gap: 0.5rem; /* Espacio entre el textarea y el contenedor de botones */
+  }
+  
+  .botones-container {
+    display: flex;
+    justify-content: center; /* Centra los botones horizontalmente dentro de este div */
+    gap: 0.5rem; /* Espacio entre los botones */
+  }

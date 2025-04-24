@@ -24,16 +24,18 @@
     <h3 class="mt-4">Comentarios:</h3>
     <ul class="list-group">
         {% for comentario in comentarios %}
-            <li class="list-group-item d-flex justify-content-between align-items-start">
+            <li class="list-group-item d-flex justify-content-between ">
                 <div>
                     <strong>{{ comentario.usuario.username }}:</strong>
                     <span id="comentario-contenido-{{ comentario.id }}">{{ comentario.contenido }}</span>
                     <div id="editar-comentario-{{ comentario.id }}" style="display: none;">
-                        <form method="post" action="{% url 'editar_comentario' comentario.id %}">
+                        <form method="post" action="{% url 'editar_comentario' comentario.id %}" class="formulario-edicion-comentario-botones">
                             {% csrf_token %}
-                            <textarea name="contenido" class="form-control mb-2">{{ comentario.contenido }}</textarea>
-                            <button type="submit" class="btn btn-sm btn-primary">Guardar</button>
-                            <button type="button" class="btn btn-sm btn-secondary" onclick="cancelarEdicion('{{ comentario.id }}')">Cancelar</button>
+                            <textarea name="contenido" class="form-control mb-3" placeholder="Escribe tu comentario aquí" required></textarea>
+                                <div class="botones-container">
+                                    <button type="submit" class="btn btn-sm btn-guardar" onclick="return confirm('¿Confirmar cambios al comentario?')">Guardar</button>
+                                    <button type="button" class="btn btn-sm btn-cancelar" onclick="cancelarEdicion('{{ comentario.id }}')">Cancelar</button>
+                                </div>
                         </form>
                     </div>
                     <br><small>{{ comentario.fecha_creacion }}</small>

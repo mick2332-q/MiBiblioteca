@@ -6,11 +6,13 @@
 
 <!-- Mostrar mensajes -->
 {% if messages %}
-    <div class="alert alert-info">
-        {% for message in messages %}
-            {{ message }}
-        {% endfor %}
-    </div>
+    {% for message in messages %}
+        {% if 'guardar_libro' in message.tags %}
+            <div class="alert alert-info">
+                {{ message }}
+            </div>
+        {% endif %}
+    {% endfor %}
 {% endif %}
 
 <!-- Barra de búsqueda -->
@@ -54,21 +56,21 @@
                         {% endif %}
 
                         <!-- Guardar libro -->
-                        {% if user.is_authenticated %}
-                        {% with libro.titulo as clave %}
-                            {% if clave in libros_guardados %}
-                                <button class="btn btn-secondary btn-sm mt-2" disabled>Libro guardado</button>
-                            {% else %}
-                                <form method="post" action="{% url 'guardar_libro' %}" class="mt-2">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="titulo" value="{{ libro.titulo }}">
-                                    <input type="hidden" name="autor" value="{{ libro.autores|join:", " }}"> 
-                                    <input type="hidden" name="link" value="{{ libro.link }}">
-                                    <input type="hidden" name="portada" value="{{ libro.portada }}">
-                                    <button type="submit" class="btn btn-success btn-sm">Guardar</button>
-                                </form>
-                            {% endif %}
-                        {% endwith %}
+                       {% if user.is_authenticated %}
+                        {% with clave_guardado=libro.titulo|add:"|"|add:libro.autores.0 %}
+                                {% if clave_guardado in libros_guardados %}
+                                    <button class="btn btn-secondary btn-sm mt-2" disabled>Libro guardado</button>
+                                {% else %}
+                                    <form method="post" action="{% url 'guardar_libro' %}" class="mt-2">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="titulo" value="{{ libro.titulo }}">
+                                        <input type="hidden" name="autor" value="{{ libro.autores|join:", " }}">
+                                        <input type="hidden" name="link" value="{{ libro.link }}">
+                                        <input type="hidden" name="portada" value="{{ libro.portada }}">
+                                        <button type="submit" class="btn btn-success btn-sm">Guardar</button>
+                                    </form>
+                                {% endif %}
+                            {% endwith %}
                         {% endif %}
 
                         <!-- Botón Comentar -->
@@ -107,8 +109,8 @@
                     {% if user.is_authenticated %}
                         <a href="{{ libro.link }}" target="_blank" class="btn btn-outline-primary btn-sm">Ver online</a>
                         <!-- Guardar libro -->
-                        {% with libro.titulo as clave %}
-                            {% if clave in libros_guardados %}
+                        {% with clave_guardado=libro.titulo|add:"|"|add:libro.autores.0 %}
+                            {% if clave_guardado in libros_guardados %}
                                 <button class="btn btn-secondary btn-sm mt-2" disabled>Libro guardado</button>
                             {% else %}
                                 <form method="post" action="{% url 'guardar_libro' %}" class="mt-2">
