@@ -33,3 +33,4 @@ htmlcov/
 
 # Ignore archivos de logs
 *.log
+.qodo
