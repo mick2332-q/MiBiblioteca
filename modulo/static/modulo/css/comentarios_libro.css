@@ -1,0 +1,17 @@
+.container  {
+    background: rgba(129, 111, 111, 0.3); 
+    color: rgb(46, 45, 44);
+    padding: 2rem;
+    border-radius: 10px; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+    width: 100%;
+}
+.btn.btn-primary{
+    background: rgba(255, 255, 255, 0.3); 
+    border: none; 
+    padding: 10px 20px; 
+    color: #fff; 
+    border-radius: 5px; 
+    cursor: pointer; 
+    transition: background 0.3s ease, color 0.3s ease; 
+}

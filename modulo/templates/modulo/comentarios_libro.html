@@ -4,7 +4,9 @@
 {% block title %}Comentarios de {{ titulo }}{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'modulo/css/comentarios_libro.css' %}">
 <div class="container">
+
     <h1>Comentarios para "{{ titulo }}"</h1>
     <p><strong>Autor:</strong> {{ autor }}</p>
 
