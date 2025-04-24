@@ -8,7 +8,8 @@ from django.contrib import messages
 from django.utils.text import slugify
 from collections import defaultdict
 from unidecode import unidecode
-import re ,random,string
+from django.http import JsonResponse
+import re ,random
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.views.decorators.http import require_POST
@@ -48,8 +49,15 @@ def index(request):
             for libro in LibroFavorito.objects.filter(usuario=request.user).values('titulo', 'autor')
         )
 
-    letra_aleatoria = random.choice(string.ascii_lowercase)
-    url_sugeridos = f'https://www.googleapis.com/books/v1/volumes?q={letra_aleatoria}'
+    libros_reconocidos = [
+        "Cien años de soledad",
+        "Harry Potter y la piedra filosofal",
+        "El amor en los tiempos del cólera",
+        "El túnel",
+    ]
+
+    libros_aleatorios = random.sample(libros_reconocidos, 1)
+    url_sugeridos = f'https://www.googleapis.com/books/v1/volumes?q={libros_aleatorios}'
     response_sugeridos = requests.get(url_sugeridos)
     if response_sugeridos.status_code == 200:
         data_sugeridos = response_sugeridos.json()
@@ -380,3 +388,39 @@ def comentarios_libro(request, titulo_slug, autor_slug):
         "autor": autor,
         "comentarios": comentarios,
     })
+
+
+@login_required
+def editar_comentario(request, comentario_id):
+    comentario = get_object_or_404(ComentarioExterno, id=comentario_id)
+    if request.user == comentario.usuario or request.user.is_superuser:
+        if request.method == "POST":
+            comentario.contenido = request.POST.get("contenido")
+            comentario.save()
+            messages.success(request, 'Comentario editado correctamente.')
+        else:
+            messages.error(request, 'Método no válido.')
+    else:
+        messages.error(request, 'No tienes permiso para editar este comentario.')
+
+    return redirect("comentarios_libro",
+        titulo_slug=slugify(comentario.titulo),
+        autor_slug=slugify(comentario.autor)
+    )
+
+@login_required
+def eliminar_comentario(request, comentario_id):
+    comentario = get_object_or_404(ComentarioExterno, id=comentario_id)
+    if request.user == comentario.usuario or request.user.is_superuser:
+        if request.method == "POST":
+            comentario.delete()
+            messages.success(request, 'Comentario eliminado correctamente.')
+        else:
+            messages.error(request, 'Método no válido.')
+    else:
+        messages.error(request, 'No tienes permiso para eliminar este comentario.')
+
+    return redirect("comentarios_libro",
+        titulo_slug=slugify(comentario.titulo),
+        autor_slug=slugify(comentario.autor)
+    )

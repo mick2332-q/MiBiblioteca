@@ -73,7 +73,7 @@
 
                         <!-- Botón Comentar -->
                         <a href="{% url 'comentarios_libro' titulo_slug=libro.titulo|slugify autor_slug=libro.autores.0|slugify %}" class="btn btn-warning btn-sm position-relative">
-                            <i class="bi bi-chat-dots"></i> Comentar
+                            <i class="bi bi-chat-dots"></i> 
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark">
                                 {{ libro.comentarios_count }}
                             </span>
@@ -126,7 +126,7 @@
                     {% endif %}
                     <!-- Botón Comentar -->
                     <a href="{% url 'comentarios_libro' titulo_slug=libro.titulo|slugify autor_slug=libro.autores.0|slugify %}" class="btn btn-warning btn-sm position-relative">
-                            <i class="bi bi-chat-dots"></i> Comentar
+                            <i class="bi bi-chat-dots"></i> 
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark">
                                 {{ libro.comentarios_count }}
                             </span>
