@@ -1,12 +1,14 @@
 from django.shortcuts import render,redirect,get_object_or_404
 import requests
-from .models import Libro, Categoria,HistorialBusqueda, LibroFavorito, LibroVisto, Reseña,ComentarioExterno
+from .models import Libro, Categoria,HistorialBusqueda, LibroFavorito, LibroVisto,ComentarioExterno
 from django.core.files.base import ContentFile
 from django.contrib.auth import authenticate,login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.utils.text import slugify
-import random
+from collections import defaultdict
+from unidecode import unidecode
+import re ,random,string
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.views.decorators.http import require_POST
@@ -19,11 +21,11 @@ def login_view(request):
         if user is not None:
             login(request, user)
             
-            # Redirigir al admin si es superusuario o staff
+            
             if user.is_superuser or user.is_staff:
                 return redirect('/admin/')
             
-            return redirect('index')  # Redirige al index si es usuario normal
+            return redirect('index')  
         else:
             messages.error(request, 'Usuario o contraseña incorrectos.')
     
@@ -31,12 +33,14 @@ def login_view(request):
 
 from django.contrib import messages
 
+
+
 def index(request):
     libros_destacados = []
     query = request.GET.get('q', '')
     resultados = []
 
-    # Obtener libros guardados por el usuario
+    
     libros_guardados = []
     if request.user.is_authenticated:
         libros_guardados = set(
@@ -44,16 +48,16 @@ def index(request):
             for libro in LibroFavorito.objects.filter(usuario=request.user).values('titulo', 'autor')
         )
 
-    # Obtener libros sugeridos aleatoriamente desde la API de Google Books
-    url_sugeridos = 'https://www.googleapis.com/books/v1/volumes?q=bestsellers'
+    letra_aleatoria = random.choice(string.ascii_lowercase)
+    url_sugeridos = f'https://www.googleapis.com/books/v1/volumes?q={letra_aleatoria}'
     response_sugeridos = requests.get(url_sugeridos)
     if response_sugeridos.status_code == 200:
         data_sugeridos = response_sugeridos.json()
         libros = data_sugeridos.get('items', [])
         libros_destacados = [
             {
-                'titulo': libro.get('volumeInfo', {}).get('title', 'Sin título'),
-                'autores': libro.get('volumeInfo', {}).get('authors', ['Desconocido']),
+                'titulo': libro.get('volumeInfo', {}).get('title', 'Sin título').strip(),
+                'autores': [autor.strip() for autor in libro.get('volumeInfo', {}).get('authors', ['Desconocido'])],
                 'portada': libro.get('volumeInfo', {}).get('imageLinks', {}).get('thumbnail', None),
                 'link': libro.get('volumeInfo', {}).get('previewLink', '#')
             }
@@ -64,7 +68,7 @@ def index(request):
         if request.user.is_authenticated:
             HistorialBusqueda.objects.create(usuario=request.user, termino=query)
 
-        # Usar la API de Google Books para buscar libros
+        
         url = f'https://www.googleapis.com/books/v1/volumes?q={query}'
         response = requests.get(url)
         if response.status_code == 200:
@@ -72,8 +76,8 @@ def index(request):
             for item in data.get('items', []):
                 info = item.get('volumeInfo', {})
                 resultados.append({
-                    'titulo': info.get('title', 'Sin título'),
-                    'autores': info.get('authors', ['Desconocido']),
+                    'titulo': info.get('title', 'Sin título').strip(),
+                    'autores': [autor.strip() for autor in info.get('authors', ['Desconocido'])],
                     'descripcion': info.get('description', 'Sin descripción'),
                     'portada': info.get('imageLinks', {}).get('thumbnail', ''),
                     'link': info.get('previewLink', '#')
@@ -82,30 +86,41 @@ def index(request):
     if not request.user.is_authenticated and len(resultados) > 3:
         resultados = resultados[:3]
 
-    # Obtener todos los comentarios
-    comentarios = ComentarioExterno.objects.all()
+    comentarios_por_libro = defaultdict(int)
+    for comentario in ComentarioExterno.objects.all():
+        
+        titulo_norm = normalizar_datos(comentario.titulo)
+        autor_norm = normalizar_datos(comentario.autor.split(',')[0])  
+        key = f"{titulo_norm}|{autor_norm}"
+        comentarios_por_libro[key] += 1
+
+        
+    for libro in resultados + libros_destacados:
+        titulo_norm = normalizar_datos(libro['titulo'])
+        autor_norm = normalizar_datos(libro['autores'][0] if libro['autores'] else 'desconocido')
+        key = f"{titulo_norm}|{autor_norm}"
+        libro['comentarios_count'] = comentarios_por_libro.get(key, 0)
 
     return render(request, 'modulo/index.html', {
         'libros_destacados': libros_destacados,
         'resultados': resultados,
         'query': query,
         'libros_guardados': libros_guardados,
-        'comentarios': comentarios
     })
 
 def ver_libro(request):
     if request.method == 'POST':
         titulo = request.POST.get('titulo')
-        autor = request.POST.get('autor')  # Obtener el autor del formulario
+        autor = request.POST.get('autor')  
         link = request.POST.get('link')
         portada = request.POST.get('portada')
         usuario = request.user
 
-        # Validar que todos los campos necesarios estén presentes
+        
         if not autor:
-            autor = "Autor desconocido"  # Valor predeterminado si no se proporciona el autor
+            autor = "Autor desconocido"  
 
-        # Crear el registro en la base de datos
+        
         LibroVisto.objects.create(
             usuario=usuario,
             titulo=titulo,
@@ -114,10 +129,10 @@ def ver_libro(request):
             portada=portada
         )
 
-        # Redirigir al enlace del libro
+        
         return redirect(link)
 
-    return redirect('index')  # Redirigir a la página principal si no es un POST
+    return redirect('index') 
 
 
 def registro(request):
@@ -126,7 +141,7 @@ def registro(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Usuario registrado con éxito. Ahora puedes iniciar sesión.')
-            return redirect('login')  # asegúrate de que exista esta vista
+            return redirect('login')  
         else:
             messages.error(request, 'Por favor, corrige los errores del formulario.')
     else:
@@ -142,7 +157,7 @@ def guardar_libro(request):
     link = request.POST.get('link')
     portada_url = request.POST.get('portada')
 
-    # Crear el libro en la base si no existe
+    
     libro, creado = Libro.objects.get_or_create(
         titulo=titulo,
         autor=autor,
@@ -159,9 +174,9 @@ def guardar_libro(request):
                 nombre_imagen = f"{libro.titulo.replace(' ', '_')}.jpg"
                 libro.portada.save(nombre_imagen, ContentFile(response.content), save=True)
         except:
-            pass  # Si no se puede descargar la portada, continuar sin error
+            pass  
 
-    # Verificar si el libro ya está en favoritos
+    
     ya_guardado = LibroFavorito.objects.filter(
         usuario=request.user,
         titulo=titulo,
@@ -185,11 +200,25 @@ def guardar_libro(request):
 @login_required
 def perfil(request):
     historial = HistorialBusqueda.objects.filter(usuario=request.user).order_by('-fecha')
-    favoritos = LibroFavorito.objects.filter(usuario=request.user).order_by('-guardado_en')
+    favoritos_qs = LibroFavorito.objects.filter(usuario=request.user).order_by('-guardado_en')
+    favoritos = list(favoritos_qs)
+
+    comentarios_por_libro = defaultdict(int)
+    for comentario in ComentarioExterno.objects.all():
+        titulo_norm = normalizar_datos(comentario.titulo)
+        autor_norm = normalizar_datos(comentario.autor.split(',')[0])
+        key = f"{titulo_norm}|{autor_norm}"
+        comentarios_por_libro[key] += 1
+
+    for libro in favoritos:
+        titulo_norm = normalizar_datos(libro.titulo)
+        autor_norm = normalizar_datos(libro.autor.split(',')[0])
+        key = f"{titulo_norm}|{autor_norm}"
+        libro.num_comentarios = comentarios_por_libro.get(key, 0)
 
     return render(request, 'modulo/perfil.html', {
         'historial': historial,
-        'favoritos': favoritos
+        'favoritos': favoritos,
     })
 
 @login_required
@@ -202,7 +231,7 @@ def marcar_libro_visto(request):
 
 
         if not LibroVisto.objects.filter(usuario=request.user, titulo=titulo, autor=autor).exists():
-            # Crear el registro solo si no existe
+            
             LibroVisto.objects.create(
                 usuario=request.user,
                 titulo=titulo,
@@ -231,21 +260,21 @@ def detalle_libro(request, id):
             'autor': ", ".join(info.get('authors', ['Desconocido'])),
             'portada': info.get('imageLinks', {}).get('thumbnail', ''),
             'descripcion': info.get('description', 'Sin descripción'),
-            'link': info.get('previewLink', '#')  # Enlace a la vista previa
+            'link': info.get('previewLink', '#')  
         }
 
-    # Obtener libros sugeridos
+   
     url_sugeridos = 'https://www.googleapis.com/books/v1/volumes?q=bestsellers'
     response_sugeridos = requests.get(url_sugeridos)
     if response_sugeridos.status_code == 200:
         data_sugeridos = response_sugeridos.json()
-        for item in data_sugeridos.get('items', [])[:5]:  # Limitar a 5 libros sugeridos
+        for item in data_sugeridos.get('items', [])[:5]:  
             info = item.get('volumeInfo', {})
             libros_sugeridos.append({
                 'titulo': info.get('title', 'Sin título'),
                 'autor': ", ".join(info.get('authors', ['Desconocido'])),
                 'portada': info.get('imageLinks', {}).get('thumbnail', ''),
-                'link': info.get('previewLink', '#')  # Enlace a la vista previa
+                'link': info.get('previewLink', '#')  
             })
 
     return render(request, 'modulo/detalle_libro.html', {
@@ -266,10 +295,10 @@ import requests
 
 
 def autor_detalle(request, autor):
-    # Si hay una coma, tomar solo el primer autor
+    
     autor_principal = autor.split(',')[0].strip()
 
-    # Usar la API de Wikipedia en español para obtener información del autor
+    
     wikipedia_url = f"https://es.wikipedia.org/w/api.php"
     params = {
         "action": "query",
@@ -289,12 +318,12 @@ def autor_detalle(request, autor):
         data = response.json()
         pages = data.get("query", {}).get("pages", {})
         for page_id, page_data in pages.items():
-            if page_id != "-1":  # Verificar que la página exista
+            if page_id != "-1":  
                 autor_info["biografia"] = page_data.get("extract", autor_info["biografia"])
 
     libros = []
     if request.user.is_authenticated:
-        # Usar la API de Google Books para buscar libros del autor si el usuario está autenticado
+        
         google_books_url = f"https://www.googleapis.com/books/v1/volumes?q=inauthor:{autor_principal}"
         response_books = requests.get(google_books_url)
 
@@ -305,7 +334,7 @@ def autor_detalle(request, autor):
                 libros.append({
                     'titulo': info.get('title', 'Sin título'),
                     'portada': info.get('imageLinks', {}).get('thumbnail', ''),
-                    'link': info.get('previewLink', '#')  # Enlace a la vista previa
+                    'link': info.get('previewLink', '#')  
                 })
 
     return render(request, 'modulo/autor_detalle.html', {
@@ -314,23 +343,37 @@ def autor_detalle(request, autor):
         'mostrar_mensaje': not request.user.is_authenticated  
     })
 
+def normalizar_datos(texto):
+    """Normaliza para búsquedas: quita tildes, espacios extras, caracteres especiales"""
+    if not texto:
+        return ""
+    texto = unidecode(texto.lower().strip())  
+    texto = re.sub(r'[^\w\s]', '', texto)    
+    return ' '.join(texto.split())            
+
 def comentarios_libro(request, titulo_slug, autor_slug):
-    # Convertir slugs a texto legible
     titulo = titulo_slug.replace('-', ' ')
     autor = autor_slug.replace('-', ' ')
     
-    # Filtrar comentarios relacionados
-    comentarios = ComentarioExterno.objects.filter(titulo=titulo, autor=autor)
+    
+    titulo_norm = normalizar_datos(titulo)
+    autor_norm = normalizar_datos(autor.split(',')[0])
+    comentarios = ComentarioExterno.objects.filter(
+        titulo__iexact=titulo,  
+        autor__icontains=autor.split(',')[0].strip()  
+    )
 
     if request.method == "POST":
-        contenido = request.POST.get("contenido")
         ComentarioExterno.objects.create(
-            titulo=titulo, 
-            autor=autor, 
-            usuario=request.user, 
-            contenido=contenido
+            titulo=titulo,  
+            autor=autor,    
+            usuario=request.user,
+            contenido=request.POST.get("contenido")
         )
-        return redirect("comentarios_libro", titulo_slug=slugify(titulo), autor_slug=slugify(autor))
+        return redirect("comentarios_libro", 
+            titulo_slug=slugify(titulo), 
+            autor_slug=slugify(autor)
+        )
 
     return render(request, "modulo/comentarios_libro.html", {
         "titulo": titulo,

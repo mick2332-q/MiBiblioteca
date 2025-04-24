@@ -72,11 +72,12 @@
                         {% endif %}
 
                         <!-- Botón Comentar -->
-                <a 
-                    href="{% url 'comentarios_libro' libro.titulo|slugify libro.autores|join:', '|slugify %}" 
-                    class="btn btn-warning btn-sm mt-2">
-                    Comentar
-                </a>
+                        <a href="{% url 'comentarios_libro' titulo_slug=libro.titulo|slugify autor_slug=libro.autores.0|slugify %}" class="btn btn-warning btn-sm position-relative">
+                            <i class="bi bi-chat-dots"></i> Comentar
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark">
+                                {{ libro.comentarios_count }}
+                            </span>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -124,11 +125,12 @@
                         <a href="{% url 'registro' %}" class="btn btn-warning btn-sm">Regístrate para ver más</a>
                     {% endif %}
                     <!-- Botón Comentar -->
-                   <a 
-                    href="{% url 'comentarios_libro' libro.titulo|slugify libro.autores|join:', '|slugify %}" 
-                    class="btn btn-warning btn-sm mt-2">
-                    Comentar
-                </a>
+                    <a href="{% url 'comentarios_libro' titulo_slug=libro.titulo|slugify autor_slug=libro.autores.0|slugify %}" class="btn btn-warning btn-sm position-relative">
+                            <i class="bi bi-chat-dots"></i> Comentar
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark">
+                                {{ libro.comentarios_count }}
+                            </span>
+                    </a>
                 </div>
             </div>
         </div>

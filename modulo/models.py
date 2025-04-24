@@ -19,11 +19,14 @@ class Libro(models.Model):
     fecha_publicacion = models.DateField(default='2000-01-01')
     categoria = models.ForeignKey('Categoria', on_delete=models.SET_NULL, null=True)
     portada = models.ImageField(upload_to='portadas/', blank=True, null=True)
-    
     link = models.URLField(max_length=500, blank=True)
 
     def __str__(self):
         return self.titulo
+
+    def comentarios_count(self):
+        from .models import ComentarioExterno
+        return ComentarioExterno.objects.filter(titulo=self.titulo, autor=self.autor).count()
 
 class HistorialBusqueda(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -70,8 +73,8 @@ class Reseña(models.Model):
         return f"Reseña de {self.usuario.username} para {self.libro_ISBN}"
     
 class ComentarioExterno(models.Model):
-    titulo = models.CharField(max_length=255)  # Título del libro
-    autor = models.CharField(max_length=255)  # Autor del libro
+    titulo = models.CharField(max_length=255)  
+    autor = models.CharField(max_length=255)  
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     contenido = models.TextField()
     fecha_creacion = models.DateTimeField(auto_now_add=True)

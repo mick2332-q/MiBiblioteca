@@ -103,3 +103,32 @@ form.d-flex.mb-4 button:hover {
 .settings-menu.active .settings-options {
     display: block;
 }
+
+/* Estilo para el botón de comentarios */
+.btn-comentario {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #333;
+    font-family: Arial, sans-serif;
+}
+
+/* Estilo para la caja del número */
+.numero-comentarios-box {
+    display: inline-block;
+    padding: 0 5px;
+    border: 1px solid #000;
+    border-radius: 2px;
+    margin-left: 5px;
+}
+
+/* Estilo para el número dentro de la caja */
+.numero-comentarios {
+    font-family: "Times New Roman", serif;
+    font-style: italic;
+}
