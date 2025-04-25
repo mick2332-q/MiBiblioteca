@@ -1,0 +1,238 @@
+body {
+    background-image: url('../img/1722.jpg'); /* Asegúrate de que la ruta a tu imagen sea correcta */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    backdrop-filter: blur(5px);
+}
+.text-muted {
+    font-size: 0.8rem;
+    color: rgb(201, 199, 199); /* Cambia a negro */
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.login--content {
+    display: flex;
+    margin-bottom: 1.5rem;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.login-box {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 0.5rem;
+    background-color: #f9f9f9;
+}
+
+.login-icon {
+    margin-right: 0.5rem;
+    color: #555;
+}
+
+.login-input {
+    border: none;
+    outline: none;
+    background: transparent;
+    flex: 1;
+    font-size: 1rem;
+    color: #333;
+}
+
+.login-input::placeholder {
+    color: #aaa;
+}
+
+.login--check {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    color: #000000;
+}
+
+.forgot-password {
+    color: #4e0900;
+    text-decoration: none;
+}
+
+.forgot-password:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+.login--button {
+    background-color: #4e0900;
+    color: #fff;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.login--button:hover {
+    background-color: #4e0900; /* Mantiene el color al pasar el mouse según la imagen */
+}
+
+.login-register {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+.login-register a {
+    color: #4e0900;
+    text-decoration: none;
+}
+
+.login-register a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* Estilos específicos para el formulario de registro para que se vea similar */
+.form-container {
+    background: rgba(219, 219, 219, 0.3);
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 500px;
+    margin-left: auto; 
+    margin-right: auto;
+}
+
+
+
+.form-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #050505;
+    margin-top: 0; /* Elimina el margen superior predeterminado del h2 */
+}
+
+.form-header p {
+    color: #0a0a0a !important; /* Color del texto (gris Bootstrap muted) */
+    font-size: 1rem; /* Tamaño de la descripción */
+    margin-top: 0.5rem; /* Espacio encima de la descripción */
+}
+
+.floating-label-group {
+    display: flex;
+    margin-bottom: 1rem; /* Reduce un poco el margen inferior */
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.input-group-icon {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 0.5rem;
+    background-color: #f9f9f9;
+}
+
+.input-group-icon i {
+    margin-right: 0.5rem;
+    color: #555;
+}
+
+.form-control.with-icon {
+    padding-left: 2.5rem; /* Ajusta el padding para el icono */
+    border: none;
+    outline: none;
+    background: transparent;
+    flex: 1;
+    font-size: 1rem;
+    color: #333;
+}
+
+.form-control.with-icon::placeholder {
+    color: #aaa;
+}
+
+.floating-label {
+    position: absolute;
+    top: 0.5rem;
+    left: 2.5rem;
+    color: #aaa;
+    font-size: 0.9rem;
+    opacity: 1;
+    transition: transform 0.2s ease-in-out, font-size 0.2s ease-in-out, opacity 0.2s ease-in-out;
+    pointer-events: none;
+}
+
+.form-control.with-icon:focus ~ .floating-label,
+.form-control.with-icon:not(:placeholder-shown) ~ .floating-label {
+    transform: translateY(-1rem) translateX(-2rem) scale(0.8);
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.password-requirements {
+    font-size: 0.8rem;
+    color: rgb(0, 0, 0); /* Cambia a negro */
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.btn-success {
+    background-color: #4e0900;
+    color: #141313;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%; /* Ocupar todo el ancho del contenedor */
+}
+
+.btn-success:hover {
+    background-color: #4e0900; /* Mantiene el color al pasar el mouse */
+}
+
+.text-center.mt-4 {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #000000;
+}
+
+.text-center.mt-4 p {
+    color: #141414 !important;
+    text-decoration: none;
+}
+
+.text-center.mt-4 a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+.alert-danger {
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.invalid-feedback {
+    font-size: 0.8rem;
+    color: #dc3545;
+    margin-top: 0.25rem;
+}
+.btn.btn-success.btn-lg{
+    background-color: #4e0900;
+    border: none;
+
+}

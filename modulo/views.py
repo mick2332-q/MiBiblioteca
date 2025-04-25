@@ -1,10 +1,12 @@
 from django.shortcuts import render,redirect,get_object_or_404
 import requests
 from .models import Libro, Categoria,HistorialBusqueda, LibroFavorito, LibroVisto,ComentarioExterno,UserProfile
-from .forms import AgregarLibroUsuarioForm,EditarPerfilForm,EditarFotoForm
+from .forms import AgregarLibroUsuarioForm,EditarPerfilForm,EditarFotoForm,RegistroUsuarioForm
 from django.core.files.base import ContentFile
 from django.contrib.auth import authenticate,login,update_session_auth_hash
-from django.contrib.auth.forms import UserCreationForm,PasswordChangeForm
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.utils.text import slugify
 from collections import defaultdict
@@ -132,19 +134,22 @@ def index(request):
 
 def registro(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = RegistroUsuarioForm(request.POST)
+        print("DATOS RECIBIDOS POR POST (CON PERFIL):")
+        print(request.POST)
         if form.is_valid():
-            user = form.save()  # Guarda el nuevo usuario
-            UserProfile.objects.create(user=user)  # Crea un UserProfile asociado
-            messages.success(request, 'Usuario registrado con éxito. Ahora puedes iniciar sesión.')
+            user = form.save()
+            UserProfile.objects.create(user=user)  # Descomenta la creación del perfil
+            messages.success(request, 'Usuario registrado con éxito (CON PERFIL). Ahora puedes iniciar sesión.')
             return redirect('login')
         else:
-            messages.error(request, 'Por favor, corrige los errores del formulario.')
+            print("ERRORES DEL REGISTRO USUARIO FORM (CON PERFIL):")
+            print(form.errors)
+            return render(request, 'modulo/registro.html', {'form': form})
     else:
-        form = UserCreationForm()
+        form = RegistroUsuarioForm()
 
     return render(request, 'modulo/registro.html', {'form': form})
-
 @require_POST
 @login_required
 def guardar_libro(request):
@@ -194,16 +199,15 @@ def guardar_libro(request):
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 @login_required
 def perfil(request):
-    if hasattr(request.user, 'perfil'):
-        user_profile = request.user.perfil
-    else:
-        user_profile = None  # Aunque deberías crear uno si no existe
+    user_profile, created = UserProfile.objects.get_or_create(user=request.user)
 
+    # Inicialización fuera del POST para evitar resetear formularios
     form_perfil = EditarPerfilForm(instance=user_profile)
     form_foto = EditarFotoForm(instance=user_profile)
-    form_password = PasswordChangeForm(request.user)
+    form_password = PasswordChangeForm(request.user)  # Formulario inicial vacío
 
     if request.method == 'POST':
+        # Determinar qué formulario se envió
         if 'editar_perfil' in request.POST:
             form_perfil = EditarPerfilForm(request.POST, instance=user_profile)
             if form_perfil.is_valid():
@@ -212,27 +216,22 @@ def perfil(request):
                 return redirect('perfil')
 
         elif 'editar_foto' in request.POST:
-            print("¡Formulario de editar foto recibido!")
             form_foto = EditarFotoForm(request.POST, request.FILES, instance=user_profile)
             if form_foto.is_valid():
-                print("¡Formulario de foto válido!")
                 form_foto.save()
-                print("Foto guardada. Nuevo valor de foto_perfil:", user_profile.foto_perfil)
                 messages.success(request, 'Foto de perfil actualizada exitosamente.')
-                return redirect('perfil')
-            else:
-                print("¡Formulario de foto NO válido!")
-                print(form_foto.errors)
-                messages.error(request, 'Hubo un error al subir la foto.')
                 return redirect('perfil')
 
         elif 'cambiar_password' in request.POST:
-            form_password = PasswordChangeForm(request.user, request.POST)
+            form_password = PasswordChangeForm(request.user, request.POST)  # Formulario con datos POST
             if form_password.is_valid():
                 user = form_password.save()
                 update_session_auth_hash(request, user)
                 messages.success(request, 'Contraseña cambiada exitosamente.')
                 return redirect('perfil')
+            else:
+                messages.error(request, 'No se pudo cambiar la contraseña. Por favor, verifica los errores.')
+                # No hacemos redirect para mantener los errores
 
     context = {
         'form_perfil': form_perfil,
