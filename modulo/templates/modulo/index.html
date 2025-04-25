@@ -29,35 +29,47 @@
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
                     {% if libro.portada %}
-                        <img src="{{ libro.portada }}" class="card-img-top" style="height: 250px; object-fit: cover;">
+                        <img src="{{ libro.portada.url|default:libro.portada }}" class="card-img-top" style="height: 250px; object-fit: cover;">
                     {% endif %}
                     <div class="card-body">
                         <h5 class="card-title">{{ libro.titulo }}</h5>
                         <p class="card-text">{{ libro.descripcion|truncatewords:25 }}</p>
                         <p class="card-text">
-                            Autor(es): 
-                            {% for autor in libro.autores %}
-                                <a href="{% url 'autor_detalle' autor %}">{{ autor }}</a>{% if not forloop.last %}, {% endif %}
-                            {% endfor %}
+                            Autor(es):
+                            {% if libro.autor %}
+                                <a href="{% url 'autor_detalle' libro.autor %}">{{ libro.autor }}</a>
+                            {% else %}
+                                {% for autor in libro.autores %}
+                                    <a href="{% url 'autor_detalle' autor %}">{{ autor }}</a>{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            {% endif %}
                         </p>
 
                         <!-- Ver online -->
                         {% if user.is_authenticated %}
-                            <form method="post" action="{% url 'ver_libro' %}" class="d-inline">
-                                {% csrf_token %}
-                                <input type="hidden" name="titulo" value="{{ libro.titulo }}">
-                                <input type="hidden" name="autor" value="{{ libro.autores|join:", " }}"> 
-                                <input type="hidden" name="link" value="{{ libro.link }}">
-                                <input type="hidden" name="portada" value="{{ libro.portada }}">
-                                <button type="submit" class="btn btn-outline-primary btn-sm">Ver online</button>
-                            </form>
+                            {% if not libro.link %}
+                                <p class="text-muted">No hay enlace disponible.</p>
+                            {% else %}
+                                <form method="post" action="{% url 'ver_libro' %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="titulo" value="{{ libro.titulo }}">
+                                    <input type="hidden" name="autor" value="{{ libro.autor|default:libro.autores|join:", " }}">
+                                    <input type="hidden" name="link" value="{{ libro.link }}">
+                                    <input type="hidden" name="portada" value="{{ libro.portada.url|default:libro.portada }}">
+                                    <button type="submit" class="btn btn-outline-primary btn-sm">Ver online</button>
+                                </form>
+                            {% endif %}
                         {% else %}
-                            <a href="{{ libro.link }}" target="_blank" class="btn btn-outline-primary btn-sm">Ver online</a>
+                            {% if libro.link %}
+                                <a href="{{ libro.link }}" target="_blank" class="btn btn-outline-primary btn-sm">Ver online</a>
+                            {% else %}
+                                <p class="text-muted">No hay enlace disponible.</p>
+                            {% endif %}
                         {% endif %}
 
                         <!-- Guardar libro -->
                        {% if user.is_authenticated %}
-                        {% with clave_guardado=libro.titulo|add:"|"|add:libro.autores.0 %}
+                            {% with clave_guardado=libro.titulo|default:''|add:"|"|add:libro.autores|first|default:'' %}
                                 {% if clave_guardado in libros_guardados %}
                                     <button class="btn btn-secondary btn-sm mt-2" disabled>Libro guardado</button>
                                 {% else %}
@@ -66,7 +78,7 @@
                                         <input type="hidden" name="titulo" value="{{ libro.titulo }}">
                                         <input type="hidden" name="autor" value="{{ libro.autores|join:", " }}">
                                         <input type="hidden" name="link" value="{{ libro.link }}">
-                                        <input type="hidden" name="portada" value="{{ libro.portada }}">
+                                        <input type="hidden" name="portada" value="{{ libro.portada.url|default:libro.portada }}">
                                         <button type="submit" class="btn btn-success btn-sm">Guardar</button>
                                     </form>
                                 {% endif %}
@@ -74,12 +86,21 @@
                         {% endif %}
 
                         <!-- Botón Comentar -->
-                        <a href="{% url 'comentarios_libro' titulo_slug=libro.titulo|slugify autor_slug=libro.autores.0|slugify %}" class="btn btn-warning btn-sm position-relative">
-                            <i class="bi bi-chat-dots"></i> 
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark">
-                                {{ libro.comentarios_count }}
-                            </span>
-                        </a>
+                        {% if libro.slug_titulo and libro.slug_autor %}
+                            <a href="{% url 'comentarios_libro' titulo_slug=libro.slug_titulo autor_slug=libro.slug_autor %}" class="btn btn-warning btn-sm position-relative mt-2">
+                                <i class="bi bi-chat-dots"></i>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark">
+                                    {# Aquí necesitarías contar los comentarios para estos libros también #} 0
+                                </span>
+                            </a>
+                        {% elif libro.titulo and libro.autores and libro.autores.0 %}
+                            <a href="{% url 'comentarios_libro' titulo_slug=libro.titulo|slugify autor_slug=libro.autores.0|slugify %}" class="btn btn-warning btn-sm position-relative mt-2">
+                                <i class="bi bi-chat-dots"></i>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark">
+                                    {{ libro.comentarios_count }}
+                                </span>
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>

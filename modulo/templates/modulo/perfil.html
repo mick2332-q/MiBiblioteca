@@ -4,11 +4,59 @@
 {% block content %}
 <h2 class="mb-4">Mi Perfil - {{ user.username }}</h2>
 
-<h4>📖 Libros guardados:</h4>
+<h4>➕ Agregar Nuevo Libro:</h4>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ agregar_libro_form.as_p }}
+    <button type="submit" class="btn btn-primary" name="agregar_libro">Guardar Libro</button>
+</form>
+
+<hr class="my-4">
+
+<h4>📚 Mis Libros Creados:</h4>
+<div class="row">
+    {% for libro_usuario in libros_usuario %}
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                {% if libro_usuario.portada %}
+                    <img src="{{ libro_usuario.portada.url }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ libro_usuario.titulo }}</h5>
+                    <p class="card-text">{{ libro_usuario.autor }}</p>
+                    {% if libro_usuario.descripcion %}
+                        <p class="card-text">{{ libro_usuario.descripcion|truncatewords:20 }}</p>
+                    {% endif %}
+                    {% if libro_usuario.link %}
+                        <a href="{{ libro_usuario.link }}" target="_blank" class="btn btn-sm btn-outline-primary">Ver online</a>
+                    {% else %}
+                        <p class="text-muted">Sin enlace</p>
+                    {% endif %}
+                    <a href="{% url 'comentarios_libro' titulo_slug=libro_usuario.slug_titulo autor_slug=libro_usuario.slug_autor %}"
+                       class="btn btn-warning btn-sm position-relative mt-2">
+                        <i class="bi bi-chat-dots"></i> Comentar
+                        {% if libro_usuario.comentarios_count > 0 %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark">
+                                {{ libro_usuario.comentarios_count }}
+                            </span>
+                        {% endif %}
+                    </a>
+                    {# Aquí podrías añadir enlaces para editar/eliminar tus propios libros si lo implementas #}
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <p>No has creado ningún libro aún.</p>
+    {% endfor %}
+</div>
+
+<hr class="my-4">
+
+<h4>⭐ Libros guardados:</h4>
 <div class="row">
     {% for libro in favoritos %}
         <div class="col-md-4 mb-3">
-            <div class="card">
+            <div class="card h-100">
                 {% if libro.portada %}
                     <img src="{{ libro.portada }}" class="card-img-top" style="height: 200px; object-fit: cover;">
                 {% endif %}
@@ -17,13 +65,13 @@
                     <p class="card-text">{{ libro.autor }}</p>
                     <a href="{{ libro.link }}" target="_blank" class="btn btn-sm btn-outline-primary">Ver online</a>
                     <a href="{% url 'eliminar_libro' libro.id %}" class="btn btn-sm btn-danger">Eliminar</a>
-                    <a href="{% url 'comentarios_libro' titulo_slug=libro.titulo|slugify autor_slug=libro.autor|slugify %}" 
-                       class="btn btn-warning btn-sm position-relative">
+                    <a href="{% url 'comentarios_libro' titulo_slug=libro.titulo|slugify autor_slug=libro.autor|slugify %}"
+                       class="btn btn-warning btn-sm position-relative mt-2">
                         <i class="bi bi-chat-dots"></i> Comentar
                         {% if libro.num_comentarios > 0 %}
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark">
-                            {{ libro.num_comentarios }}
-                        </span>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark">
+                                {{ libro.num_comentarios }}
+                            </span>
                         {% endif %}
                     </a>
                 </div>
@@ -34,7 +82,7 @@
     {% endfor %}
 </div>
 
-<hr>
+<hr class="my-4">
 
 <h4>🔍 Historial de búsquedas:</h4>
 <ul class="list-group">

@@ -1,6 +1,7 @@
 from django.shortcuts import render,redirect,get_object_or_404
 import requests
 from .models import Libro, Categoria,HistorialBusqueda, LibroFavorito, LibroVisto,ComentarioExterno
+from .forms import AgregarLibroUsuarioForm
 from django.core.files.base import ContentFile
 from django.contrib.auth import authenticate,login
 from django.contrib.auth.forms import UserCreationForm
@@ -8,7 +9,7 @@ from django.contrib import messages
 from django.utils.text import slugify
 from collections import defaultdict
 from unidecode import unidecode
-import re ,random
+import re ,random,pprint
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.views.decorators.http import require_POST
@@ -67,9 +68,9 @@ def index(request):
                 'portada': libro.get('volumeInfo', {}).get('imageLinks', {}).get('thumbnail', None),
                 'link': libro.get('volumeInfo', {}).get('previewLink', '#')
             }
+            
             for libro in libros[:4]
         ]
-
     if query:
         if request.user.is_authenticated:
             HistorialBusqueda.objects.create(usuario=request.user, termino=query)
@@ -87,8 +88,22 @@ def index(request):
                     'descripcion': info.get('description', 'Sin descripción'),
                     'portada': info.get('imageLinks', {}).get('thumbnail', ''),
                     'link': info.get('previewLink', '#')
-                })
+                })  
+    from .models import Libro
 
+    libros_usuario_publicos = Libro.objects.filter(creado_por_usuario=True).order_by('-fecha_publicacion')
+    for libro_usuario in libros_usuario_publicos:
+        # *** CAMBIO 3: Cómo se agregan los libros de usuario a la lista de resultados ***
+        resultados.append({
+            'titulo': libro_usuario.titulo,
+            'autores': [libro_usuario.autor],
+            'descripcion': libro_usuario.descripcion if libro_usuario.descripcion else 'Sin descripción proporcionada por el usuario.',
+            'portada': libro_usuario.portada.url if libro_usuario.portada else '',
+            'link': libro_usuario.link if libro_usuario.link else '#',
+            'es_usuario': True, # Indica que este libro fue añadido por un usuario
+            'slug_titulo': libro_usuario.slug_titulo,
+            'slug_autor': libro_usuario.slug_autor,
+        })
     if not request.user.is_authenticated and len(resultados) > 3:
         resultados = resultados[:3]
 
@@ -102,8 +117,8 @@ def index(request):
 
         
     for libro in resultados + libros_destacados:
-        titulo_norm = normalizar_datos(libro['titulo'])
-        autor_norm = normalizar_datos(libro['autores'][0] if libro['autores'] else 'desconocido')
+        titulo_norm = normalizar_datos(libro.get('titulo', '') if isinstance(libro, dict) else libro.titulo)
+        autor_norm = normalizar_datos(libro.get('autores', [''])[0] if isinstance(libro, dict) else libro.autor)
         key = f"{titulo_norm}|{autor_norm}"
         libro['comentarios_count'] = comentarios_por_libro.get(key, 0)
 
@@ -222,9 +237,33 @@ def perfil(request):
         key = f"{titulo_norm}|{autor_norm}"
         libro.num_comentarios = comentarios_por_libro.get(key, 0)
 
+    # Obtén todas las categorías disponibles
+    categorias = Categoria.objects.all()
+
+    if request.method == 'POST' and 'agregar_libro' in request.POST:
+        # Pasa las categorías al formulario en la petición POST también
+        agregar_libro_form = AgregarLibroUsuarioForm(request.POST, request.FILES)
+        if agregar_libro_form.is_valid():
+            nuevo_libro = agregar_libro_form.save(commit=False)
+            nuevo_libro.usuario_creador = request.user # Usa usuario_creador en lugar de usuario
+            nuevo_libro.creado_por_usuario = True # Marca el libro como creado por el usuario
+            nuevo_libro.save()
+            messages.success(request, 'Libro añadido exitosamente.')
+            return redirect('perfil')
+        else:
+            messages.error(request, 'Por favor, corrige los errores del formulario.')
+    else:
+        # Pasa las categorías al formulario al instanciarlo inicialmente
+        agregar_libro_form = AgregarLibroUsuarioForm()
+
+    libros_usuario = Libro.objects.filter(usuario_creador=request.user).order_by('-fecha_creacion_usuario')
+
     return render(request, 'modulo/perfil.html', {
         'historial': historial,
         'favoritos': favoritos,
+        'agregar_libro_form': agregar_libro_form,
+        'libros_usuario': libros_usuario,
+        'categorias': categorias, 
     })
 
 @login_required
