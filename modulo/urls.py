@@ -14,4 +14,8 @@ urlpatterns = [
     path('eliminar-libro/<int:id>/', views.eliminar_libro_guardado, name='eliminar_libro'),
     path('editar_comentario/<int:comentario_id>/', views.editar_comentario, name='editar_comentario'),
     path('eliminar_comentario/<int:comentario_id>/', views.eliminar_comentario, name='eliminar_comentario'),
+    path('libros-guardados/', views.libros_guardados, name='libros_guardados'),
+    path('mis-libros/', views.libros_creados, name='libros_creados'),
+    path('crear-libro/', views.crear_libro, name='crear_libro'),
+    path('historial/', views.historial, name='historial_vistos'),
 ]

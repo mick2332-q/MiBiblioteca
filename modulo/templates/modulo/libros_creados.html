@@ -1,0 +1,43 @@
+{% extends 'modulo/base.html' %}
+{% block title %}Mis Libros Creados{% endblock %}
+
+{% block content %}
+    <h4>📚 Mis Libros Creados:</h4>
+    <div class="row">
+        {% for libro_usuario in libros_usuario %}
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    {% if libro_usuario.portada %}
+                        <img src="{{ libro_usuario.portada.url }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ libro_usuario.titulo }}</h5>
+                        <p class="card-text">{{ libro_usuario.autor }}</p>
+                        {% if libro_usuario.descripcion %}
+                            <p class="card-text">{{ libro_usuario.descripcion|truncatewords:20 }}</p>
+                        {% endif %}
+                        {% if libro_usuario.link %}
+                            <a href="{{ libro_usuario.link }}" target="_blank" class="btn btn-sm btn-outline-primary">Ver online</a>
+                        {% else %}
+                            <p class="text-muted">Sin enlace</p>
+                        {% endif %}
+                        <a href="{% url 'comentarios_libro' titulo_slug=libro_usuario.slug_titulo autor_slug=libro_usuario.slug_autor %}"
+                           class="btn btn-warning btn-sm position-relative mt-2">
+                            <i class="bi bi-chat-dots"></i> Comentar
+                            {% if libro_usuario.comentarios_count > 0 %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark">
+                                    {{ libro_usuario.comentarios_count }}
+                                </span>
+                            {% endif %}
+                        </a>
+                        {# Aquí podrías añadir enlaces para editar/eliminar tus propios libros si lo implementas #}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p>No has creado ningún libro aún.</p>
+        {% endfor %}
+    </div>
+
+    <hr class="my-4">
+{% endblock %}

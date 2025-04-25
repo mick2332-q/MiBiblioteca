@@ -1,0 +1,10 @@
+{% extends 'modulo/base.html' %}
+{% block title %}Crear Nuevo Libro{% endblock %}
+{% block content %}
+<h4>➕ Agregar Nuevo Libro:</h4>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ agregar_libro_form.as_p }}
+    <button type="submit" class="btn btn-primary" name="agregar_libro">Guardar Libro</button>
+</form>
+{% endblock %}

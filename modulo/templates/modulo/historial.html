@@ -1,0 +1,37 @@
+{% extends 'modulo/base.html' %}
+{% block title %}Historial{% endblock %}
+
+{% block content %}
+    <h2>Historial</h2>
+
+    <h4 class="mt-4">🔍 Historial de Búsquedas:</h4>
+    {% if historial_busqueda %}
+        <ul class="list-group">
+            {% for h in historial_busqueda %}
+                <li class="list-group-item">
+                    {{ h.termino }}
+                    <span class="text-muted float-end">{{ h.fecha|date:"SHORT_DATETIME_FORMAT" }}</span>
+                </li>
+            {% empty %}
+                <li class="list-group-item">No hay búsquedas recientes.</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No hay historial de búsquedas.</p>
+    {% endif %}
+
+    <h4 class="mt-4"><i class="fas fa-history"></i> Historial de Libros Vistos:</h4>
+    {% if historial_vistos %}
+        <ul class="list-group">
+            {% for libro_visto in historial_vistos %}
+                <li class="list-group-item">
+                    <strong>{{ libro_visto.titulo }}</strong> por {{ libro_visto.autor }}
+                    <span class="text-muted float-end">Visto el: {{ libro_visto.fecha_visto|date:"d/m/Y H:i" }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No has visto ningún libro recientemente.</p>
+    {% endif %}
+
+{% endblock %}

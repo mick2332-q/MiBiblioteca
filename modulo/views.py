@@ -9,7 +9,8 @@ from django.contrib import messages
 from django.utils.text import slugify
 from collections import defaultdict
 from unidecode import unidecode
-import re ,random,pprint
+import re ,random
+from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.views.decorators.http import require_POST
@@ -93,14 +94,14 @@ def index(request):
 
     libros_usuario_publicos = Libro.objects.filter(creado_por_usuario=True).order_by('-fecha_publicacion')
     for libro_usuario in libros_usuario_publicos:
-        # *** CAMBIO 3: Cómo se agregan los libros de usuario a la lista de resultados ***
+        
         resultados.append({
             'titulo': libro_usuario.titulo,
             'autores': [libro_usuario.autor],
             'descripcion': libro_usuario.descripcion if libro_usuario.descripcion else 'Sin descripción proporcionada por el usuario.',
             'portada': libro_usuario.portada.url if libro_usuario.portada else '',
-            'link': libro_usuario.link if libro_usuario.link else '#',
-            'es_usuario': True, # Indica que este libro fue añadido por un usuario
+            'link': libro_usuario.link if libro_usuario.link else '',
+            'es_usuario': True, 
             'slug_titulo': libro_usuario.slug_titulo,
             'slug_autor': libro_usuario.slug_autor,
         })
@@ -129,33 +130,6 @@ def index(request):
         'libros_guardados': libros_guardados,
     })
 
-def ver_libro(request):
-    if request.method == 'POST':
-        titulo = request.POST.get('titulo')
-        autor = request.POST.get('autor')  
-        link = request.POST.get('link')
-        portada = request.POST.get('portada')
-        usuario = request.user
-
-        
-        if not autor:
-            autor = "Autor desconocido"  
-
-        
-        LibroVisto.objects.create(
-            usuario=usuario,
-            titulo=titulo,
-            autor=autor,
-            link=link,
-            portada=portada
-        )
-
-        
-        return redirect(link)
-
-    return redirect('index') 
-
-
 def registro(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
@@ -178,7 +152,7 @@ def guardar_libro(request):
     link = request.POST.get('link')
     portada_url = request.POST.get('portada')
 
-    # Crear el libro en la base si no existe
+    
     libro, creado = Libro.objects.get_or_create(
         titulo=titulo,
         autor=autor,
@@ -195,9 +169,9 @@ def guardar_libro(request):
                 nombre_imagen = f"{libro.titulo.replace(' ', '_')}.jpg"
                 libro.portada.save(nombre_imagen, ContentFile(response.content), save=True)
         except:
-            pass  # Si no se puede descargar la portada, continuar sin error
+            pass  
 
-    # Verificar si el libro ya está en favoritos
+    
     ya_guardado = LibroFavorito.objects.filter(
         usuario=request.user,
         titulo=titulo,
@@ -237,23 +211,23 @@ def perfil(request):
         key = f"{titulo_norm}|{autor_norm}"
         libro.num_comentarios = comentarios_por_libro.get(key, 0)
 
-    # Obtén todas las categorías disponibles
+    
     categorias = Categoria.objects.all()
 
     if request.method == 'POST' and 'agregar_libro' in request.POST:
-        # Pasa las categorías al formulario en la petición POST también
+       
         agregar_libro_form = AgregarLibroUsuarioForm(request.POST, request.FILES)
         if agregar_libro_form.is_valid():
             nuevo_libro = agregar_libro_form.save(commit=False)
-            nuevo_libro.usuario_creador = request.user # Usa usuario_creador en lugar de usuario
-            nuevo_libro.creado_por_usuario = True # Marca el libro como creado por el usuario
+            nuevo_libro.usuario_creador = request.user 
+            nuevo_libro.creado_por_usuario = True 
             nuevo_libro.save()
             messages.success(request, 'Libro añadido exitosamente.')
             return redirect('perfil')
         else:
             messages.error(request, 'Por favor, corrige los errores del formulario.')
     else:
-        # Pasa las categorías al formulario al instanciarlo inicialmente
+        
         agregar_libro_form = AgregarLibroUsuarioForm()
 
     libros_usuario = Libro.objects.filter(usuario_creador=request.user).order_by('-fecha_creacion_usuario')
@@ -267,6 +241,73 @@ def perfil(request):
     })
 
 @login_required
+def libros_guardados(request):
+    favoritos_qs = LibroFavorito.objects.filter(usuario=request.user).order_by('-guardado_en')
+    favoritos = list(favoritos_qs)
+
+    comentarios_por_libro = defaultdict(int)
+    for comentario in ComentarioExterno.objects.all():
+        titulo_norm = normalizar_datos(comentario.titulo)
+        autor_norm = normalizar_datos(comentario.autor.split(',')[0])
+        key = f"{titulo_norm}|{autor_norm}"
+        comentarios_por_libro[key] += 1
+
+    for libro in favoritos:
+        titulo_norm = normalizar_datos(libro.titulo)
+        autor_norm = normalizar_datos(libro.autor.split(',')[0])
+        key = f"{titulo_norm}|{autor_norm}"
+        libro.num_comentarios = comentarios_por_libro.get(key, 0)
+
+    context = {
+        'favoritos': favoritos,
+    }
+    return render(request, 'modulo/libros_guardados.html', context)
+
+@login_required
+def libros_creados(request):
+    libros_usuario = Libro.objects.filter(usuario_creador=request.user).order_by('-fecha_creacion_usuario')
+    context = {
+        'libros_usuario': libros_usuario,
+    }
+    return render(request, 'modulo/libros_creados.html', context)
+
+@login_required
+def crear_libro(request):
+    categorias = Categoria.objects.all() 
+
+    if request.method == 'POST' and 'agregar_libro' in request.POST:
+        agregar_libro_form = AgregarLibroUsuarioForm(request.POST, request.FILES)
+        if agregar_libro_form.is_valid():
+            nuevo_libro = agregar_libro_form.save(commit=False)
+            nuevo_libro.usuario_creador = request.user
+            nuevo_libro.creado_por_usuario = True
+            nuevo_libro.slug_titulo = slugify(nuevo_libro.titulo)
+            nuevo_libro.slug_autor = slugify(nuevo_libro.autor) if nuevo_libro.autor else 'anonimo'
+            nuevo_libro.save()
+            messages.success(request, 'Libro añadido exitosamente.')
+            return redirect('libros_creados') 
+        else:
+            agregar_libro_form = AgregarLibroUsuarioForm(request.POST, request.FILES) 
+    else:
+        agregar_libro_form = AgregarLibroUsuarioForm() 
+
+    context = {
+        'agregar_libro_form': agregar_libro_form,
+        'categorias': categorias, 
+    }
+    return render(request, 'modulo/crear_libro.html', context)
+
+@login_required
+def historial(request):
+    historial_busqueda = HistorialBusqueda.objects.filter(usuario=request.user).order_by('-fecha')
+    historial_vistos = LibroVisto.objects.filter(usuario=request.user).order_by('-fecha_visto')
+    context = {
+        'historial_busqueda': historial_busqueda,
+        'historial_vistos': historial_vistos,
+    }
+    return render(request, 'modulo/historial.html', context)
+
+@login_required
 def marcar_libro_visto(request):
     if request.method == 'POST':
         titulo = request.POST.get('titulo')
@@ -274,8 +315,12 @@ def marcar_libro_visto(request):
         link = request.POST.get('link')
         portada = request.POST.get('portada')
 
-
-        if not LibroVisto.objects.filter(usuario=request.user, titulo=titulo, autor=autor).exists():
+        try:
+            libro_visto = LibroVisto.objects.get(usuario=request.user, titulo=titulo, autor=autor)
+            
+            libro_visto.fecha_visto = timezone.now()
+            libro_visto.save()
+        except LibroVisto.DoesNotExist:
             
             LibroVisto.objects.create(
                 usuario=request.user,
@@ -284,11 +329,9 @@ def marcar_libro_visto(request):
                 link=link,
                 portada=portada
             )
-            messages.success(request, 'Libro marcado como visto.')
-        else:
-            messages.info(request, 'Este libro ya está marcado como visto.')
-
         return redirect(link)
+
+    return redirect('index')
     
 @login_required
 def detalle_libro(request, id):
