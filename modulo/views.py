@@ -1,10 +1,10 @@
 from django.shortcuts import render,redirect,get_object_or_404
 import requests
-from .models import Libro, Categoria,HistorialBusqueda, LibroFavorito, LibroVisto,ComentarioExterno
-from .forms import AgregarLibroUsuarioForm
+from .models import Libro, Categoria,HistorialBusqueda, LibroFavorito, LibroVisto,ComentarioExterno,UserProfile
+from .forms import AgregarLibroUsuarioForm,EditarPerfilForm,EditarFotoForm
 from django.core.files.base import ContentFile
-from django.contrib.auth import authenticate,login
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import authenticate,login,update_session_auth_hash
+from django.contrib.auth.forms import UserCreationForm,PasswordChangeForm
 from django.contrib import messages
 from django.utils.text import slugify
 from collections import defaultdict
@@ -134,9 +134,10 @@ def registro(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            form.save()
+            user = form.save()  # Guarda el nuevo usuario
+            UserProfile.objects.create(user=user)  # Crea un UserProfile asociado
             messages.success(request, 'Usuario registrado con éxito. Ahora puedes iniciar sesión.')
-            return redirect('login')  
+            return redirect('login')
         else:
             messages.error(request, 'Por favor, corrige los errores del formulario.')
     else:
@@ -191,54 +192,54 @@ def guardar_libro(request):
         messages.info(request, 'Este libro ya estaba en tus favoritos.')
 
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
-
 @login_required
 def perfil(request):
-    historial = HistorialBusqueda.objects.filter(usuario=request.user).order_by('-fecha')
-    favoritos_qs = LibroFavorito.objects.filter(usuario=request.user).order_by('-guardado_en')
-    favoritos = list(favoritos_qs)
-
-    comentarios_por_libro = defaultdict(int)
-    for comentario in ComentarioExterno.objects.all():
-        titulo_norm = normalizar_datos(comentario.titulo)
-        autor_norm = normalizar_datos(comentario.autor.split(',')[0])
-        key = f"{titulo_norm}|{autor_norm}"
-        comentarios_por_libro[key] += 1
-
-    for libro in favoritos:
-        titulo_norm = normalizar_datos(libro.titulo)
-        autor_norm = normalizar_datos(libro.autor.split(',')[0])
-        key = f"{titulo_norm}|{autor_norm}"
-        libro.num_comentarios = comentarios_por_libro.get(key, 0)
-
-    
-    categorias = Categoria.objects.all()
-
-    if request.method == 'POST' and 'agregar_libro' in request.POST:
-       
-        agregar_libro_form = AgregarLibroUsuarioForm(request.POST, request.FILES)
-        if agregar_libro_form.is_valid():
-            nuevo_libro = agregar_libro_form.save(commit=False)
-            nuevo_libro.usuario_creador = request.user 
-            nuevo_libro.creado_por_usuario = True 
-            nuevo_libro.save()
-            messages.success(request, 'Libro añadido exitosamente.')
-            return redirect('perfil')
-        else:
-            messages.error(request, 'Por favor, corrige los errores del formulario.')
+    if hasattr(request.user, 'perfil'):
+        user_profile = request.user.perfil
     else:
-        
-        agregar_libro_form = AgregarLibroUsuarioForm()
+        user_profile = None  # Aunque deberías crear uno si no existe
 
-    libros_usuario = Libro.objects.filter(usuario_creador=request.user).order_by('-fecha_creacion_usuario')
+    form_perfil = EditarPerfilForm(instance=user_profile)
+    form_foto = EditarFotoForm(instance=user_profile)
+    form_password = PasswordChangeForm(request.user)
 
-    return render(request, 'modulo/perfil.html', {
-        'historial': historial,
-        'favoritos': favoritos,
-        'agregar_libro_form': agregar_libro_form,
-        'libros_usuario': libros_usuario,
-        'categorias': categorias, 
-    })
+    if request.method == 'POST':
+        if 'editar_perfil' in request.POST:
+            form_perfil = EditarPerfilForm(request.POST, instance=user_profile)
+            if form_perfil.is_valid():
+                form_perfil.save()
+                messages.success(request, 'Perfil actualizado exitosamente.')
+                return redirect('perfil')
+
+        elif 'editar_foto' in request.POST:
+            print("¡Formulario de editar foto recibido!")
+            form_foto = EditarFotoForm(request.POST, request.FILES, instance=user_profile)
+            if form_foto.is_valid():
+                print("¡Formulario de foto válido!")
+                form_foto.save()
+                print("Foto guardada. Nuevo valor de foto_perfil:", user_profile.foto_perfil)
+                messages.success(request, 'Foto de perfil actualizada exitosamente.')
+                return redirect('perfil')
+            else:
+                print("¡Formulario de foto NO válido!")
+                print(form_foto.errors)
+                messages.error(request, 'Hubo un error al subir la foto.')
+                return redirect('perfil')
+
+        elif 'cambiar_password' in request.POST:
+            form_password = PasswordChangeForm(request.user, request.POST)
+            if form_password.is_valid():
+                user = form_password.save()
+                update_session_auth_hash(request, user)
+                messages.success(request, 'Contraseña cambiada exitosamente.')
+                return redirect('perfil')
+
+    context = {
+        'form_perfil': form_perfil,
+        'form_foto': form_foto,
+        'form_password': form_password,
+    }
+    return render(request, 'modulo/perfil.html', context)
 
 @login_required
 def libros_guardados(request):

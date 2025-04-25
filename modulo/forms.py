@@ -1,5 +1,5 @@
 from django import forms
-from .models import Libro, Categoria
+from .models import Libro, UserProfile
 
 class AgregarLibroUsuarioForm(forms.ModelForm):
     class Meta:
@@ -12,3 +12,13 @@ class AgregarLibroUsuarioForm(forms.ModelForm):
             'portada': forms.FileInput(attrs={'class': 'form-control', 'required': False}),
             'categoria': forms.Select(attrs={'class': 'form-control'}), # Utiliza Select para un desplegable
         }
+    
+class EditarPerfilForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['descripcion']  # SOLO descripcion
+
+class EditarFotoForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['foto_perfil']
